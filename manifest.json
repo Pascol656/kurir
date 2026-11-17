@@ -1,13 +1,13 @@
 {
-  "name": "sugan te poho - Kurir",
+  "name": "Kurir",
   "short_name": "Kurir",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#f0f2f5",
-  "theme_color": "#22c55e",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1582/1582813.png",
+      "src": "sun.png",
       "sizes": "512x512",
       "type": "image/png"
     }
