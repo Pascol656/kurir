@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sugan te poho</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22c55e">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1582/1582813.png">
+<style>
+  *{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+  body{margin:0;background:#f0f2f5;padding:15px}
+  .wrap{max-width:700px;margin:0 auto}
+  .card{background:#fff;padding:18px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:15px}
+  h2{margin:0 0 5px;text-align:center}
+  p.sub{text-align:center;color:#666;margin:0 0 15px;font-size:13px}
+  label{font-size:13px;font-weight:700;display:block;margin-top:10px}
+  input,textarea,select{width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;margin-top:5px;font-size:14px;outline:none}
+  .btn{border:none;padding:12px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;width:100%;margin-top:10px;color:#fff}
+  .btn-green{background:#22c55e}.btn-blue{background:#2563eb}.btn-gray{background:#64748b}.btn-orange{background:#f97316}
+  .row{display:flex;gap:8px}.row .btn{flex:1}
+  .stat{display:flex;gap:10px;text-align:center;margin-top:12px}.stat div{flex:1;background:#f8fafc;padding:10px;border-radius:10px;border:1px solid #eee}.stat b{font-size:20px;display:block}.stat span{font-size:11px;color:#666}
+  .item{background:#fff;padding:14px;border-radius:12px;margin-bottom:10px;border-left:5px solid #f59e0b;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+  .item.selesai{border-left-color:#22c55e;opacity:.85}
+  .badge{font-size:11px;padding:3px 8px;border-radius:20px;color:#fff;background:#f59e0b}.badge.done{background:#22c55e}
+  .aksi{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.aksi button{flex:1;min-width:90px;padding:9px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px}
+  .navi{background:#2563eb;color:#fff}.wa{background:#25D366;color:#fff}.telp{background:#f1f5f9}.done{background:#22c55e;color:#fff}.hapus{background:#fee2e2;color:#dc2626}
+  #installBtn{display:none;background:#111}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h2>📦 sugan te poho</h2>
+    <p class="sub">solusi ker dewek sugan mah - Versi Aplikasi</p>
+    <button id="installBtn" class="btn" onclick="installApp()">⬇️ INSTALL JADI APLIKASI</button>
+    <label>Nama Penerima *</label>
+    <input id="nama" placeholder="Contoh: Budi">
+    <label>No HP / WA</label>
+    <input id="hp" placeholder="08123456789">
+    <label>Alamat Lengkap *</label>
+    <textarea id="alamat" rows="2" placeholder="Jl. Randegan No. 10"></textarea>
+    <label>Catatan / Patokan</label>
+    <textarea id="catatan" rows="2" placeholder="Pagar hitam, depan warung, dll"></textarea>
+    <label>Pin Lokasi</label>
+    <input id="pin" placeholder="Klik tombol di bawah">
+    <button class="btn btn-blue" onclick="ambilPin()">📍 Ambil Pin Lokasi Saya</button>
+    <button class="btn btn-green" onclick="simpan()">💾 SIMPAN ALAMAT</button>
+    <div class="row">
+      <button class="btn btn-orange" onclick="backup()">📤 Backup</button>
+      <button class="btn btn-gray" onclick="document.getElementById('fileBackup').click()">📥 Pulihkan</button>
+      <input type="file" id="fileBackup" accept=".json" style="display:none" onchange="pulihkan(event)">
+    </div>
+    <div class="stat"><div><b id="total">0</b><span>Total</span></div><div><b id="belum">0</b><span>Belum Antar</span></div><div><b id="sudah">0</b><span>Selesai</span></div></div>
+  </div>
+  <div class="card">
+    <input id="cari" oninput="tampil()" placeholder="🔍 Cari nama / alamat / patokan...">
+    <select id="filter" onchange="tampil()" style="margin-top:8px"><option value="semua">Semua</option><option value="belum">Belum Antar Saja</option><option value="selesai">Sudah Selesai</option></select>
+  </div>
+  <div id="list"></div>
+</div>
+<script>
+let data = JSON.parse(localStorage.getItem('kurirDataV2') || '[]');
+function ambilPin(){ if(!navigator.geolocation) return alert('Tidak support GPS'); document.getElementById('pin').value='Mengambil...'; navigator.geolocation.getCurrentPosition(pos=>{document.getElementById('pin').value=pos.coords.latitude+','+pos.coords.longitude;},()=>{document.getElementById('pin').value=''; alert('Aktifkan GPS');}); }
+function simpan(){ let nama=document.getElementById('nama').value.trim(); let hp=document.getElementById('hp').value.trim(); let alamat=document.getElementById('alamat').value.trim(); let catatan=document.getElementById('catatan').value.trim(); let pin=document.getElementById('pin').value.trim(); if(!nama||!alamat) return alert('Nama & Alamat wajib!'); data.unshift({nama,hp,alamat,catatan,pin,selesai:false,tanggal:new Date().toLocaleDateString('id-ID')}); localStorage.setItem('kurirDataV2',JSON.stringify(data)); document.getElementById('nama').value='';document.getElementById('hp').value='';document.getElementById('alamat').value='';document.getElementById('catatan').value='';document.getElementById('pin').value=''; tampil(); alert('Berhasil!'); }
+function tampil(){ let q=document.getElementById('cari').value.toLowerCase(); let f=document.getElementById('filter').value; let list=document.getElementById('list'); list.innerHTML=''; let filtered=data.filter(d=>{let c=(d.nama+' '+d.alamat+' '+d.catatan).toLowerCase().includes(q); let cf=f==='semua'?true:f==='belum'?!d.selesai:d.selesai; return c&&cf;}); document.getElementById('total').innerText=data.length; document.getElementById('belum').innerText=data.filter(d=>!d.selesai).length; document.getElementById('sudah').innerText=data.filter(d=>d.selesai).length; if(filtered.length===0){list.innerHTML='<div class="card" style="text-align:center;color:#888">Belum ada alamat</div>';return;} filtered.forEach(d=>{let idx=data.indexOf(d); let hpBersih=d.hp.replace(/[^0-9]/g,''); if(hpBersih.startsWith('0')) hpBersih='62'+hpBersih.slice(1); let waLink='https://wa.me/'+hpBersih+'?text='+encodeURIComponent('Halo '+d.nama+', saya kurir. Paket mau diantar ke '+d.alamat+'. Patokan: '+d.catatan); let mapsLink=d.pin?'https://www.google.com/maps?q='+d.pin:'https://www.google.com/maps/search/'+encodeURIComponent(d.alamat); list.innerHTML+=`<div class="item ${d.selesai?'selesai':''}"><div style="display:flex;justify-content:space-between"><b>${d.nama}</b><span class="badge ${d.selesai?'done':''}">${d.selesai?'✅ SELESAI':'📦 BELUM'}</span></div><div style="font-size:13px;margin-top:6px">📍 ${d.alamat}</div><div style="font-size:13px">📝 <b>${d.catatan||'-'}</b></div><div style="font-size:12px;color:#999">📞 ${d.hp||'-'} | ${d.tanggal}</div><div class="aksi"><button class="navi" onclick="window.open('${mapsLink}','_blank')">🧭 Navigasi</button><button class="wa" onclick="window.open('${waLink}','_blank')">💬 WA</button><button class="telp" onclick="window.location.href='tel:${d.hp}'">📞 Telpon</button><button class="done" onclick="toggleSelesai(${idx})">${d.selesai?'↩ Batal':'✅ Selesai'}</button><button class="hapus" onclick="hapus(${idx})">🗑 Hapus</button></div></div>`;}); }
+function toggleSelesai(i){data[i].selesai=!data[i].selesai;localStorage.setItem('kurirDataV2',JSON.stringify(data));tampil();}
+function hapus(i){if(confirm('Hapus '+data[i].nama+'?')){data.splice(i,1);localStorage.setItem('kurirDataV2',JSON.stringify(data));tampil();}}
+function backup(){if(data.length===0) return alert('Belum ada data!'); let blob=new Blob([JSON.stringify(data)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='backup-kurir-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); alert('Backup berhasil! Simpen di Drive ya!');}
+function pulihkan(e){let file=e.target.files[0]; if(!file) return; let r=new FileReader(); r.onload=function(ev){try{let h=JSON.parse(ev.target.result); data=h; localStorage.setItem('kurirDataV2',JSON.stringify(data)); tampil(); alert('Berhasil! '+data.length+' alamat balik!');}catch{alert('File salah!');}}; r.readAsText(file);}
+tampil();
+// PWA Install
+let deferredPrompt; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').style.display='block'; });
+function installApp(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('installBtn').style.display='none'; }); } }
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+</script>
+</body>
+</html>
